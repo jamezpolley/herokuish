@@ -7,6 +7,8 @@ BUILD_TAG ?= dev
 BUILDPACK_ORDER := multi ruby nodejs clojure python java gradle scala play php go static
 SHELL := /bin/bash
 
+MINIKUBE_MOUNT_PATH ?= $PWD
+
 shellcheck:
 ifneq ($(shell shellcheck --version > /dev/null 2>&1 ; echo $$?),0)
 ifeq ($(SYSTEM),Darwin)
@@ -38,7 +40,7 @@ build-in-docker:
 	docker build --rm -f Dockerfile.build -t $(NAME)-build .
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:ro \
 		-v /var/lib/docker:/var/lib/docker \
-		-v ${PWD}:/src/github.com/gliderlabs/herokuish -w /src/github.com/gliderlabs/herokuish \
+		-v ${MINIKUBE_MOUNT_PATH}:/src/github.com/gliderlabs/herokuish:rw -w /src/github.com/gliderlabs/herokuish \
 		-e IMAGE_NAME=$(IMAGE_NAME) -e BUILD_TAG=$(BUILD_TAG) -e VERSION=master \
 		$(NAME)-build make -e deps build
 	docker rmi $(NAME)-build || true
